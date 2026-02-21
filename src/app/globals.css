@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1a1a1a;
+  --muted: #f0eeeb;
+  --muted-foreground: #6b6561;
+  --border: #e5e1dc;
+  --accent: #8b7355;
+  --accent-foreground: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0c0b0a;
+    --foreground: #ede9e3;
+    --muted: #1a1816;
+    --muted-foreground: #9a9490;
+    --border: #2a2725;
+    --accent: #c4a882;
+    --accent-foreground: #0c0b0a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Markdown-style links in chat */
+.chat-message a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: opacity 0.2s;
+}
+
+.chat-message a:hover {
+  opacity: 0.8;
+}
