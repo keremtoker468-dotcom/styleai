@@ -148,8 +148,8 @@ export default function Chat({ onBack }: ChatProps) {
       </header>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
-        <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6">
+        <div className="max-w-xl mx-auto py-8 space-y-8 flex flex-col min-h-full justify-center">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -158,25 +158,18 @@ export default function Chat({ onBack }: ChatProps) {
               }`}
             >
               {msg.role === "assistant" ? (
-                <div className="flex gap-3 sm:gap-4">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mt-1">
-                    <span className="text-accent text-xs font-serif font-semibold">
-                      S
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="chat-message text-sm sm:text-base leading-relaxed text-foreground/90"
-                      dangerouslySetInnerHTML={{
-                        __html: formatMessage(msg.content),
-                      }}
-                    />
-                  </div>
+                <div>
+                  <p
+                    className="chat-message text-sm sm:text-[15px] leading-[1.8] text-foreground/85"
+                    dangerouslySetInnerHTML={{
+                      __html: formatMessage(msg.content),
+                    }}
+                  />
                 </div>
               ) : (
                 <div className="max-w-[85%] sm:max-w-[75%]">
                   <div className="bg-foreground text-background px-4 py-3 rounded-2xl rounded-br-sm">
-                    <p className="text-sm sm:text-base leading-relaxed">
+                    <p className="text-sm sm:text-[15px] leading-relaxed">
                       {msg.content}
                     </p>
                   </div>
@@ -186,20 +179,15 @@ export default function Chat({ onBack }: ChatProps) {
           ))}
 
           {isLoading && (
-            <div className="flex gap-3 sm:gap-4 animate-fade-in">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center mt-1">
-                <span className="text-accent text-xs font-serif font-semibold">
-                  S
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 pt-2">
-                <span className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-pulse-subtle" />
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle" />
                 <span
-                  className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-pulse-subtle"
+                  className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.3s" }}
                 />
                 <span
-                  className="w-1.5 h-1.5 bg-muted-foreground/40 rounded-full animate-pulse-subtle"
+                  className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.6s" }}
                 />
               </div>
@@ -211,9 +199,9 @@ export default function Chat({ onBack }: ChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border px-4 sm:px-6 py-4">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-end gap-3 bg-muted rounded-2xl px-4 py-3">
+      <div className="sticky bottom-0 px-4 sm:px-6 pb-6 pt-3">
+        <div className="max-w-xl mx-auto">
+          <div className="flex items-end gap-3 border border-border/60 rounded-xl px-4 py-3 bg-background/80 backdrop-blur-sm">
             <textarea
               ref={inputRef}
               value={input}
@@ -221,31 +209,28 @@ export default function Chat({ onBack }: ChatProps) {
               onKeyDown={handleKeyDown}
               placeholder="Tell me about your style..."
               rows={1}
-              className="flex-1 bg-transparent text-sm sm:text-base resize-none outline-none placeholder:text-muted-foreground/50 max-h-[120px]"
+              className="flex-1 bg-transparent text-sm sm:text-[15px] resize-none outline-none placeholder:text-muted-foreground/40 max-h-[120px]"
             />
             <button
               onClick={sendMessage}
               disabled={!input.trim() || isLoading}
-              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-foreground text-background disabled:opacity-30 transition-opacity hover:bg-accent hover:text-accent-foreground"
+              className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground disabled:opacity-20 transition-all hover:text-accent"
             >
               <svg
                 className="w-4 h-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                strokeWidth={2}
+                strokeWidth={1.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M5 12h14M12 5l7 7-7 7"
+                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
                 />
               </svg>
             </button>
           </div>
-          <p className="text-center text-xs text-muted-foreground/40 mt-3">
-            StyleAI may make mistakes. Verify important information.
-          </p>
         </div>
       </div>
     </div>

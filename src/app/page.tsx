@@ -19,24 +19,24 @@ export default function Home() {
         </h1>
         <div className="w-12 h-px bg-accent mx-auto mb-8" />
         <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed mb-4">
-          Your personal styling assistant, powered by AI.
+          Your personal styling assistant.
         </p>
-        <p className="text-muted-foreground/70 text-sm sm:text-base leading-relaxed mb-12 max-w-md mx-auto">
+        <p className="text-muted-foreground/70 text-sm sm:text-base leading-relaxed mb-14 max-w-md mx-auto">
           Tell us about your style, occasion, and preferences — we&apos;ll
-          curate the perfect outfit for you with links to shop instantly.
+          curate the perfect outfit for you.
         </p>
 
         <button
           onClick={() => setShowChat(true)}
-          className="group relative inline-flex items-center gap-3 bg-foreground text-background px-8 py-4 text-sm tracking-widest uppercase transition-all duration-300 hover:bg-accent hover:text-accent-foreground"
+          className="group relative inline-flex items-center gap-3 border border-foreground/20 text-foreground px-10 py-4 text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:border-accent hover:text-accent hover:tracking-[0.25em]"
         >
           <span>Start Styling</span>
           <svg
-            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+            className="w-3.5 h-3.5 opacity-0 -ml-3 transition-all duration-500 group-hover:opacity-100 group-hover:ml-0"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            strokeWidth={2}
+            strokeWidth={1.5}
           >
             <path
               strokeLinecap="round"
@@ -46,12 +46,12 @@ export default function Home() {
           </svg>
         </button>
 
-        {/* Store logos */}
-        <div className="mt-16 flex items-center justify-center gap-8 text-muted-foreground/40 text-xs tracking-widest uppercase">
+        {/* Store names */}
+        <div className="mt-20 flex items-center justify-center gap-6 text-muted-foreground/25 text-[10px] tracking-[0.3em] uppercase">
           <span>Beymen</span>
-          <span className="w-px h-3 bg-border" />
+          <span className="text-border/50">&middot;</span>
           <span>Zara</span>
-          <span className="w-px h-3 bg-border" />
+          <span className="text-border/50">&middot;</span>
           <span>Mango</span>
         </div>
       </div>
