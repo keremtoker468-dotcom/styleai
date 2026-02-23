@@ -1,11 +1,18 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+let _supabase: SupabaseClient | null = null;
 
-export const supabase: SupabaseClient = supabaseUrl
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : (null as unknown as SupabaseClient);
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) {
+      throw new Error("Supabase env vars not configured");
+    }
+    _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
 
 export interface StyleProfile {
   id?: string;
@@ -51,68 +58,92 @@ export function getUserId(): string {
 export async function saveStyleProfile(
   profile: StyleProfile
 ): Promise<StyleProfile | null> {
-  const { data, error } = await supabase
-    .from("style_profiles")
-    .upsert(profile, { onConflict: "user_id" })
-    .select()
-    .single();
-  if (error) {
-    console.error("Error saving profile:", error);
+  try {
+    const { data, error } = await getSupabase()
+      .from("style_profiles")
+      .upsert(profile, { onConflict: "user_id" })
+      .select()
+      .single();
+    if (error) {
+      console.error("Error saving profile:", error);
+      return null;
+    }
+    return data;
+  } catch {
     return null;
   }
-  return data;
 }
 
 export async function getStyleProfile(
   userId: string
 ): Promise<StyleProfile | null> {
-  const { data, error } = await supabase
-    .from("style_profiles")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-  if (error) {
-    if (error.code === "PGRST116") return null; // no rows
-    console.error("Error fetching profile:", error);
+  try {
+    const { data, error } = await getSupabase()
+      .from("style_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+    if (error) {
+      if (error.code === "PGRST116") return null;
+      console.error("Error fetching profile:", error);
+      return null;
+    }
+    return data;
+  } catch {
     return null;
   }
-  return data;
 }
 
-export async function saveOutfit(outfit: SavedOutfit): Promise<SavedOutfit | null> {
-  const { data, error } = await supabase
-    .from("saved_outfits")
-    .insert(outfit)
-    .select()
-    .single();
-  if (error) {
-    console.error("Error saving outfit:", error);
+export async function saveOutfit(
+  outfit: SavedOutfit
+): Promise<SavedOutfit | null> {
+  try {
+    const { data, error } = await getSupabase()
+      .from("saved_outfits")
+      .insert(outfit)
+      .select()
+      .single();
+    if (error) {
+      console.error("Error saving outfit:", error);
+      return null;
+    }
+    return data;
+  } catch {
     return null;
   }
-  return data;
 }
 
-export async function getSavedOutfits(userId: string): Promise<SavedOutfit[]> {
-  const { data, error } = await supabase
-    .from("saved_outfits")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-  if (error) {
-    console.error("Error fetching outfits:", error);
+export async function getSavedOutfits(
+  userId: string
+): Promise<SavedOutfit[]> {
+  try {
+    const { data, error } = await getSupabase()
+      .from("saved_outfits")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Error fetching outfits:", error);
+      return [];
+    }
+    return data || [];
+  } catch {
     return [];
   }
-  return data || [];
 }
 
 export async function deleteOutfit(outfitId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from("saved_outfits")
-    .delete()
-    .eq("id", outfitId);
-  if (error) {
-    console.error("Error deleting outfit:", error);
+  try {
+    const { error } = await getSupabase()
+      .from("saved_outfits")
+      .delete()
+      .eq("id", outfitId);
+    if (error) {
+      console.error("Error deleting outfit:", error);
+      return false;
+    }
+    return true;
+  } catch {
     return false;
   }
-  return true;
 }
