@@ -25,6 +25,7 @@ const config: Config = {
         "fade-in": "fadeIn 0.6s ease-out",
         "slide-up": "slideUp 0.5s ease-out",
         "pulse-subtle": "pulseSubtle 2s ease-in-out infinite",
+        shake: "shake 0.4s ease-in-out",
       },
       keyframes: {
         fadeIn: {
@@ -38,6 +39,11 @@ const config: Config = {
         pulseSubtle: {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
+        },
+        shake: {
+          "0%, 100%": { transform: "translateX(0)" },
+          "25%": { transform: "translateX(-6px)" },
+          "75%": { transform: "translateX(6px)" },
         },
       },
     },

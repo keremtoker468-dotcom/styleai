@@ -6,14 +6,83 @@ import StyleProfileSetup from "@/components/StyleProfileSetup";
 import SavedOutfits from "@/components/SavedOutfits";
 import { StyleProfile, getUserId, getStyleProfile } from "@/lib/supabase";
 
+const ACCESS_PASSWORD = process.env.NEXT_PUBLIC_ACCESS_PASSWORD || "";
+
 type View = "landing" | "profile-setup" | "chat" | "saved";
 
+function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === ACCESS_PASSWORD) {
+      localStorage.setItem("styleai_auth", "true");
+      onUnlock();
+    } else {
+      setError(true);
+      setTimeout(() => setError(false), 1500);
+    }
+  };
+
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+      <div className="animate-fade-in text-center max-w-sm w-full">
+        <h1 className="font-serif text-4xl sm:text-5xl tracking-tight mb-3">
+          Style<span className="text-accent">AI</span>
+        </h1>
+        <div className="w-12 h-px bg-accent mx-auto mb-8" />
+        <p className="text-muted-foreground text-sm mb-8">
+          Bu site şu anda özel erişime açıktır.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Şifre"
+            autoFocus
+            className={`w-full bg-transparent border rounded-lg px-4 py-3 text-sm text-center outline-none transition-colors placeholder:text-muted-foreground/40 ${
+              error
+                ? "border-red-400 animate-shake"
+                : "border-border focus:border-accent"
+            }`}
+          />
+          <button
+            type="submit"
+            className="w-full border border-foreground/20 text-foreground px-6 py-3 text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:border-accent hover:text-accent rounded-lg"
+          >
+            Giriş
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
+
 export default function Home() {
+  const [authed, setAuthed] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const [view, setView] = useState<View>("landing");
   const [profile, setProfile] = useState<StyleProfile | null>(null);
   const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
+    // If no password is set, skip the gate
+    if (!ACCESS_PASSWORD) {
+      setAuthed(true);
+    } else {
+      const saved = localStorage.getItem("styleai_auth");
+      if (saved === "true") {
+        setAuthed(true);
+      }
+    }
+    setAuthChecked(true);
+  }, []);
+
+  useEffect(() => {
+    if (!authed) return;
     const checkProfile = async () => {
       const userId = getUserId();
       if (!userId) {
@@ -27,7 +96,7 @@ export default function Home() {
       setProfileChecked(true);
     };
     checkProfile();
-  }, []);
+  }, [authed]);
 
   const handleStartStyling = () => {
     if (profile || localStorage.getItem("styleai_profile_skipped")) {
@@ -45,6 +114,12 @@ export default function Home() {
     }
     setView("chat");
   };
+
+  if (!authChecked) return null;
+
+  if (!authed) {
+    return <PasswordGate onUnlock={() => setAuthed(true)} />;
+  }
 
   if (!profileChecked) {
     return (
