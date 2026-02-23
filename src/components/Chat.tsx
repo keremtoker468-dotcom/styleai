@@ -293,19 +293,21 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to get response");
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to get response");
+
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: data.message },
       ]);
-    } catch {
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "";
+      console.error("Chat error:", errMsg);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Bir sorun oluştu, tekrar deneyebilir misin?",
+          content: `Bir sorun oluştu, tekrar deneyebilir misin?${errMsg ? ` (${errMsg})` : ""}`,
         },
       ]);
     } finally {

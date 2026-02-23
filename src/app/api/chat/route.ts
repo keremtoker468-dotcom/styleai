@@ -113,11 +113,15 @@ ${profileContext}`;
       systemInstruction: fullPrompt,
     });
 
-    // Convert messages to Gemini format
-    const history = messages.slice(0, -1).map((msg) => ({
-      role: msg.role === "assistant" ? "model" : "user",
+    // Convert messages to Gemini format, ensuring history starts with "user" role
+    const allHistory = messages.slice(0, -1).map((msg) => ({
+      role: (msg.role === "assistant" ? "model" : "user") as "model" | "user",
       parts: buildGeminiParts(msg),
     }));
+
+    // Gemini requires history to start with a "user" message — drop leading "model" messages
+    const firstUserIdx = allHistory.findIndex((m) => m.role === "user");
+    const history = firstUserIdx >= 0 ? allHistory.slice(firstUserIdx) : [];
 
     const chat = model.startChat({ history });
 
@@ -128,10 +132,11 @@ ${profileContext}`;
     const text = response.text();
 
     return NextResponse.json({ message: text });
-  } catch (error) {
-    console.error("Chat API error:", error);
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error("Chat API error:", errMsg);
     return NextResponse.json(
-      { error: "Failed to generate response" },
+      { error: errMsg },
       { status: 500 }
     );
   }
