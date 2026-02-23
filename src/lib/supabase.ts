@@ -147,3 +147,50 @@ export async function deleteOutfit(outfitId: string): Promise<boolean> {
     return false;
   }
 }
+
+export interface ConversationMessage {
+  id?: string;
+  user_id: string;
+  role: string;
+  content: string;
+  created_at?: string;
+}
+
+export async function saveConversationMessage(
+  message: Omit<ConversationMessage, "id" | "created_at">
+): Promise<boolean> {
+  try {
+    const { error } = await getSupabase()
+      .from("conversations")
+      .insert(message);
+    if (error) {
+      console.error("Error saving conversation message:", error);
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function getConversationHistory(
+  userId: string,
+  limit: number = 20
+): Promise<ConversationMessage[]> {
+  try {
+    const { data, error } = await getSupabase()
+      .from("conversations")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) {
+      console.error("Error fetching conversation history:", error);
+      return [];
+    }
+    // Reverse so oldest messages come first
+    return (data || []).reverse();
+  } catch {
+    return [];
+  }
+}

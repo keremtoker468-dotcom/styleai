@@ -7,6 +7,8 @@ import {
   OutfitItem,
   getUserId,
   saveOutfit,
+  saveConversationMessage,
+  getConversationHistory,
 } from "@/lib/supabase";
 
 interface MessagePart {
@@ -195,11 +197,31 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
     outfitTitle: string;
     items: OutfitItem[];
   } | null>(null);
+  const [conversationHistory, setConversationHistory] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const profileContext = profile ? buildProfileContext(profile) : "";
+
+  // Load past conversation history from Supabase on mount
+  useEffect(() => {
+    const loadHistory = async () => {
+      const userId = getUserId();
+      if (!userId) return;
+      const history = await getConversationHistory(userId, 20);
+      if (history.length > 0) {
+        const formatted = history
+          .map(
+            (msg) =>
+              `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`
+          )
+          .join("\n");
+        setConversationHistory(formatted);
+      }
+    };
+    loadHistory();
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -279,6 +301,16 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
       inputRef.current.style.height = "auto";
     }
 
+    // Save user message to Supabase
+    const userId = getUserId();
+    if (userId) {
+      saveConversationMessage({
+        user_id: userId,
+        role: "user",
+        content: displayContent || "Bu hakkında ne düşünüyorsun?",
+      });
+    }
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -290,11 +322,21 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
             parts: m.parts,
           })),
           profileContext: profileContext || undefined,
+          conversationHistory: conversationHistory || undefined,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to get response");
+
+      // Save assistant message to Supabase
+      if (userId) {
+        saveConversationMessage({
+          user_id: userId,
+          role: "assistant",
+          content: data.message,
+        });
+      }
 
       setMessages((prev) => [
         ...prev,
