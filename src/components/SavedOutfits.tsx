@@ -150,6 +150,16 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                             {item.name}
                           </span>
                           <div className="flex items-center gap-2 text-xs">
+                            {item.search_link && (
+                              <a
+                                href={item.search_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-accent hover:opacity-70 transition-opacity"
+                              >
+                                Ara
+                              </a>
+                            )}
                             {item.beymen_link && (
                               <a
                                 href={item.beymen_link}

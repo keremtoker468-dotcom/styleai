@@ -40,6 +40,7 @@ export interface SavedOutfit {
 
 export interface OutfitItem {
   name: string;
+  search_link?: string;
   beymen_link?: string;
   zara_link?: string;
   mango_link?: string;

@@ -187,14 +187,6 @@ export default function Home() {
           </svg>
         </button>
 
-        {/* Store names */}
-        <div className="mt-20 flex items-center justify-center gap-6 text-muted-foreground/25 text-[10px] tracking-[0.3em] uppercase">
-          <span>Beymen</span>
-          <span className="text-border/50">&middot;</span>
-          <span>Zara</span>
-          <span className="text-border/50">&middot;</span>
-          <span>Mango</span>
-        </div>
       </div>
     </main>
   );

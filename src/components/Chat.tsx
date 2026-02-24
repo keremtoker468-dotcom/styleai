@@ -119,28 +119,41 @@ function parseOutfitsFromMessage(
       if (itemName.length < 2) continue;
 
       const item: OutfitItem = { name: itemName };
-      const beymenMatch =
+
+      // Google Shopping link
+      const googleMatch =
         line.match(
-          /(?:Beymen[:\s]*)?https:\/\/www\.beymen\.com\/search\?q=[^\s)]+/i
+          /\[(?:Ara|Satın Al|Bul|Google)[^\]]*\]\((https:\/\/www\.google\.com\/search\?[^\s)]+)\)/i
         ) ||
         line.match(
+          /(?:https:\/\/www\.google\.com\/search\?tbm=shop&q=[^\s)]+)/i
+        );
+
+      // Legacy store links (backward compatibility)
+      const beymenMatch =
+        line.match(
           /\[Beymen\]\((https:\/\/www\.beymen\.com\/search\?q=[^\s)]+)\)/i
+        ) ||
+        line.match(
+          /(?:Beymen[:\s]*)?https:\/\/www\.beymen\.com\/search\?q=[^\s)]+/i
         );
       const zaraMatch =
         line.match(
-          /(?:Zara[:\s]*)?https:\/\/www\.zara\.com\/tr\/tr\/search\?searchTerm=[^\s)]+/i
+          /\[Zara\]\((https:\/\/www\.zara\.com\/tr\/tr\/search\?searchTerm=[^\s)]+)\)/i
         ) ||
         line.match(
-          /\[Zara\]\((https:\/\/www\.zara\.com\/tr\/tr\/search\?searchTerm=[^\s)]+)\)/i
+          /(?:Zara[:\s]*)?https:\/\/www\.zara\.com\/tr\/tr\/search\?searchTerm=[^\s)]+/i
         );
       const mangoMatch =
         line.match(
-          /(?:Mango[:\s]*)?https:\/\/shop\.mango\.com\/tr\/search\?q=[^\s)]+/i
+          /\[Mango\]\((https:\/\/shop\.mango\.com\/tr\/search\?q=[^\s)]+)\)/i
         ) ||
         line.match(
-          /\[Mango\]\((https:\/\/shop\.mango\.com\/tr\/search\?q=[^\s)]+)\)/i
+          /(?:Mango[:\s]*)?https:\/\/shop\.mango\.com\/tr\/search\?q=[^\s)]+/i
         );
 
+      if (googleMatch)
+        item.search_link = googleMatch[1] || googleMatch[0];
       if (beymenMatch)
         item.beymen_link =
           beymenMatch[1] || beymenMatch[0].replace(/^Beymen[:\s]*/i, "");
@@ -151,7 +164,7 @@ function parseOutfitsFromMessage(
         item.mango_link =
           mangoMatch[1] || mangoMatch[0].replace(/^Mango[:\s]*/i, "");
 
-      if (item.beymen_link || item.zara_link || item.mango_link) {
+      if (item.search_link || item.beymen_link || item.zara_link || item.mango_link) {
         items.push(item);
       }
     }
@@ -198,9 +211,11 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
     items: OutfitItem[];
   } | null>(null);
   const [conversationHistory, setConversationHistory] = useState<string>("");
+  const [profileOpen, setProfileOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
 
   const profileContext = profile ? buildProfileContext(profile) : "";
 
@@ -234,6 +249,19 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Close profile dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    if (profileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [profileOpen]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -463,35 +491,39 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
         <h1 className="font-serif text-xl tracking-tight">
           Style<span className="text-accent">AI</span>
         </h1>
-        <button
-          onClick={onOpenSaved}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-accent transition-colors"
-          title="Kayıtlı Kombinler"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onOpenSaved}
+            className="flex items-center text-muted-foreground hover:text-accent transition-colors"
+            title="Kayıtlı Kombinler"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
-            />
-          </svg>
-        </button>
-      </header>
-
-      {/* Profile banner */}
-      {profile &&
-        (profile.style_preferences?.length ||
-          profile.color_preferences?.length) && (
-          <div className="px-4 sm:px-6 py-2.5 border-b border-border/50 bg-muted/30">
-            <div className="max-w-xl mx-auto flex items-center gap-2 text-xs text-muted-foreground overflow-x-auto">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+              />
+            </svg>
+          </button>
+          {/* Profile icon */}
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+                profileOpen
+                  ? "border-accent text-accent bg-accent/10"
+                  : "border-border text-muted-foreground hover:border-accent hover:text-accent"
+              }`}
+              title="Profil"
+            >
               <svg
-                className="w-3.5 h-3.5 flex-shrink-0 text-accent"
+                className="w-4 h-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -503,34 +535,111 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                   d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
                 />
               </svg>
-              {profile.style_preferences?.map((s) => (
-                <span
-                  key={s}
-                  className="px-2 py-0.5 bg-accent/10 text-accent rounded-full whitespace-nowrap"
-                >
-                  {s}
-                </span>
-              ))}
-              {profile.color_preferences?.slice(0, 3).map((c) => (
-                <span
-                  key={c}
-                  className="px-2 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap"
-                >
-                  {c}
-                </span>
-              ))}
-              {profile.size && (
-                <span className="px-2 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap">
-                  {profile.size}
-                </span>
-              )}
-            </div>
+            </button>
+
+            {/* Profile dropdown */}
+            {profileOpen && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-background border border-border rounded-xl shadow-lg z-50 animate-fade-in overflow-hidden">
+                <div className="px-4 py-3 border-b border-border/50">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Profil Bilgileri</p>
+                </div>
+                {profile ? (
+                  <div className="p-4 space-y-3">
+                    {/* Body info */}
+                    {(profile.height || profile.weight || profile.age || profile.size || profile.shoe_size) && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {profile.height && (
+                          <span className="px-2 py-0.5 bg-foreground/5 text-foreground/70 rounded-full text-[11px] whitespace-nowrap">
+                            {profile.height}
+                          </span>
+                        )}
+                        {profile.weight && (
+                          <span className="px-2 py-0.5 bg-foreground/5 text-foreground/70 rounded-full text-[11px] whitespace-nowrap">
+                            {profile.weight}
+                          </span>
+                        )}
+                        {profile.age && (
+                          <span className="px-2 py-0.5 bg-foreground/5 text-foreground/70 rounded-full text-[11px] whitespace-nowrap">
+                            {profile.age} yaş
+                          </span>
+                        )}
+                        {profile.size && (
+                          <span className="px-2 py-0.5 bg-foreground/5 text-foreground/70 rounded-full text-[11px] whitespace-nowrap">
+                            Beden: {profile.size}
+                          </span>
+                        )}
+                        {profile.shoe_size && (
+                          <span className="px-2 py-0.5 bg-foreground/5 text-foreground/70 rounded-full text-[11px] whitespace-nowrap">
+                            Ayakkabı: {profile.shoe_size}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {/* Style preferences */}
+                    {profile.style_preferences && profile.style_preferences.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Stil</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.style_preferences.map((s) => (
+                            <span
+                              key={s}
+                              className="px-2 py-0.5 bg-accent/10 text-accent rounded-full text-[11px] whitespace-nowrap"
+                            >
+                              {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Color preferences */}
+                    {profile.color_preferences && profile.color_preferences.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Renkler</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.color_preferences.map((c) => (
+                            <span
+                              key={c}
+                              className="px-2 py-0.5 bg-foreground/5 text-foreground/60 rounded-full text-[11px] whitespace-nowrap"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* Avoided styles */}
+                    {profile.avoided_styles && profile.avoided_styles.length > 0 && (
+                      <div>
+                        <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Kaçınılanlar</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {profile.avoided_styles.map((a) => (
+                            <span
+                              key={a}
+                              className="px-2 py-0.5 bg-red-500/5 text-red-400/70 rounded-full text-[11px] whitespace-nowrap"
+                            >
+                              {a}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center">
+                    <p className="text-xs text-muted-foreground/60">
+                      Henüz profil oluşturulmadı.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+      </header>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6">
-        <div className="max-w-xl mx-auto py-8 space-y-8 flex flex-col min-h-full justify-center">
+        <div className="max-w-xl mx-auto py-6 space-y-8 flex flex-col">
           {messages.map((msg, i) => (
             <div
               key={i}
