@@ -146,6 +146,7 @@ export default function Home() {
       <Chat
         onBack={() => setView("landing")}
         profile={profile}
+        onProfileUpdate={(updated) => setProfile(updated)}
         onOpenSaved={() => setView("saved")}
       />
     );

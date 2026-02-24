@@ -7,6 +7,7 @@ import {
   OutfitItem,
   getUserId,
   saveOutfit,
+  saveStyleProfile,
   saveConversationMessage,
   getConversationHistory,
 } from "@/lib/supabase";
@@ -27,8 +28,22 @@ interface Message {
 interface ChatProps {
   onBack: () => void;
   profile: StyleProfile | null;
+  onProfileUpdate: (profile: StyleProfile) => void;
   onOpenSaved: () => void;
 }
+
+const STYLE_OPTIONS = [
+  "Minimalist", "Streetwear", "Old Money", "Casual", "Bohemian", "Sporty",
+  "Elegant", "Y2K", "Quiet Luxury", "Vintage", "Preppy", "Grunge",
+];
+const COLOR_OPTIONS = [
+  "Siyah", "Beyaz", "Lacivert", "Bej", "Kahverengi", "Gri",
+  "Kırmızı", "Yeşil", "Mavi", "Pembe", "Mor", "Turuncu",
+];
+const AVOIDED_OPTIONS = [
+  "Neon renkler", "Oversize", "Slim fit", "Desenli", "Parlak kumaş",
+  "Crop top", "Kısa etek", "Yüksek topuk", "Spor ayakkabı", "Takı/aksesuar",
+];
 
 interface PendingImage {
   base64: string;
@@ -195,7 +210,7 @@ function parseOutfitsFromMessage(
   return outfits;
 }
 
-export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
+export default function Chat({ onBack, profile, onProfileUpdate, onOpenSaved }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: GREETING },
   ]);
@@ -212,6 +227,14 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
   } | null>(null);
   const [conversationHistory, setConversationHistory] = useState<string>("");
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileEditing, setProfileEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    height: "", weight: "", age: "", size: "", shoe_size: "",
+    style_preferences: [] as string[],
+    color_preferences: [] as string[],
+    avoided_styles: [] as string[],
+  });
+  const [profileSaving, setProfileSaving] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -539,11 +562,180 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
 
             {/* Profile dropdown */}
             {profileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-background border border-border rounded-xl shadow-lg z-50 animate-fade-in overflow-hidden">
-                <div className="px-4 py-3 border-b border-border/50">
+              <div className="absolute right-0 top-full mt-2 w-80 bg-background border border-border rounded-xl shadow-lg z-50 animate-fade-in overflow-hidden">
+                <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide">Profil Bilgileri</p>
+                  {!profileEditing && (
+                    <button
+                      onClick={() => {
+                        setEditForm({
+                          height: profile?.height || "",
+                          weight: profile?.weight || "",
+                          age: profile?.age || "",
+                          size: profile?.size || "",
+                          shoe_size: profile?.shoe_size || "",
+                          style_preferences: profile?.style_preferences || [],
+                          color_preferences: profile?.color_preferences || [],
+                          avoided_styles: profile?.avoided_styles || [],
+                        });
+                        setProfileEditing(true);
+                      }}
+                      className="text-[11px] text-muted-foreground hover:text-accent transition-colors flex items-center gap-1"
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                      </svg>
+                      Düzenle
+                    </button>
+                  )}
                 </div>
-                {profile ? (
+
+                {profileEditing ? (
+                  <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                    {/* Body info inputs */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { key: "height" as const, label: "Boy", placeholder: "170 cm" },
+                        { key: "weight" as const, label: "Kilo", placeholder: "65 kg" },
+                        { key: "age" as const, label: "Yaş", placeholder: "25" },
+                        { key: "size" as const, label: "Beden", placeholder: "M / 38" },
+                      ].map((field) => (
+                        <div key={field.key}>
+                          <label className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1 block">{field.label}</label>
+                          <input
+                            type="text"
+                            value={editForm[field.key]}
+                            onChange={(e) => setEditForm({ ...editForm, [field.key]: e.target.value })}
+                            placeholder={field.placeholder}
+                            className="w-full bg-transparent border border-border rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/30"
+                          />
+                        </div>
+                      ))}
+                      <div className="col-span-2">
+                        <label className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1 block">Ayakkabı No</label>
+                        <input
+                          type="text"
+                          value={editForm.shoe_size}
+                          onChange={(e) => setEditForm({ ...editForm, shoe_size: e.target.value })}
+                          placeholder="40"
+                          className="w-full bg-transparent border border-border rounded-lg px-2.5 py-1.5 text-xs outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/30"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Style chips */}
+                    <div>
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Stil Tercihleri</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {STYLE_OPTIONS.map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => setEditForm({
+                              ...editForm,
+                              style_preferences: editForm.style_preferences.includes(s)
+                                ? editForm.style_preferences.filter((x) => x !== s)
+                                : [...editForm.style_preferences, s],
+                            })}
+                            className={`px-2 py-0.5 rounded-full text-[11px] border transition-all ${
+                              editForm.style_preferences.includes(s)
+                                ? "bg-accent/10 text-accent border-accent/30"
+                                : "bg-transparent text-muted-foreground/60 border-border hover:border-foreground/30"
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Color chips */}
+                    <div>
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Renk Tercihleri</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {COLOR_OPTIONS.map((c) => (
+                          <button
+                            key={c}
+                            onClick={() => setEditForm({
+                              ...editForm,
+                              color_preferences: editForm.color_preferences.includes(c)
+                                ? editForm.color_preferences.filter((x) => x !== c)
+                                : [...editForm.color_preferences, c],
+                            })}
+                            className={`px-2 py-0.5 rounded-full text-[11px] border transition-all ${
+                              editForm.color_preferences.includes(c)
+                                ? "bg-accent/10 text-accent border-accent/30"
+                                : "bg-transparent text-muted-foreground/60 border-border hover:border-foreground/30"
+                            }`}
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Avoided chips */}
+                    <div>
+                      <p className="text-[10px] text-muted-foreground/60 uppercase tracking-wide mb-1.5">Kaçınılanlar</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {AVOIDED_OPTIONS.map((a) => (
+                          <button
+                            key={a}
+                            onClick={() => setEditForm({
+                              ...editForm,
+                              avoided_styles: editForm.avoided_styles.includes(a)
+                                ? editForm.avoided_styles.filter((x) => x !== a)
+                                : [...editForm.avoided_styles, a],
+                            })}
+                            className={`px-2 py-0.5 rounded-full text-[11px] border transition-all ${
+                              editForm.avoided_styles.includes(a)
+                                ? "bg-red-500/10 text-red-400/70 border-red-400/30"
+                                : "bg-transparent text-muted-foreground/60 border-border hover:border-foreground/30"
+                            }`}
+                          >
+                            {a}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Save / Cancel buttons */}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={() => setProfileEditing(false)}
+                        className="flex-1 border border-border text-muted-foreground px-3 py-2 text-[11px] tracking-wide uppercase rounded-lg hover:border-foreground/40 transition-colors"
+                      >
+                        İptal
+                      </button>
+                      <button
+                        onClick={async () => {
+                          setProfileSaving(true);
+                          const userId = getUserId();
+                          const updated: StyleProfile = {
+                            user_id: userId,
+                            height: editForm.height || undefined,
+                            weight: editForm.weight || undefined,
+                            age: editForm.age || undefined,
+                            size: editForm.size || undefined,
+                            shoe_size: editForm.shoe_size || undefined,
+                            style_preferences: editForm.style_preferences.length > 0 ? editForm.style_preferences : undefined,
+                            color_preferences: editForm.color_preferences.length > 0 ? editForm.color_preferences : undefined,
+                            avoided_styles: editForm.avoided_styles.length > 0 ? editForm.avoided_styles : undefined,
+                          };
+                          const saved = await saveStyleProfile(updated);
+                          if (saved) {
+                            onProfileUpdate(saved);
+                          }
+                          setProfileSaving(false);
+                          setProfileEditing(false);
+                        }}
+                        disabled={profileSaving}
+                        className="flex-1 bg-foreground text-background px-3 py-2 text-[11px] tracking-wide uppercase rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        {profileSaving ? "Kaydediliyor..." : "Kaydet"}
+                      </button>
+                    </div>
+                  </div>
+                ) : profile ? (
                   <div className="p-4 space-y-3">
                     {/* Body info */}
                     {(profile.height || profile.weight || profile.age || profile.size || profile.shoe_size) && (
@@ -625,10 +817,22 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                     )}
                   </div>
                 ) : (
-                  <div className="p-4 text-center">
+                  <div className="p-4 text-center space-y-3">
                     <p className="text-xs text-muted-foreground/60">
                       Henüz profil oluşturulmadı.
                     </p>
+                    <button
+                      onClick={() => {
+                        setEditForm({
+                          height: "", weight: "", age: "", size: "", shoe_size: "",
+                          style_preferences: [], color_preferences: [], avoided_styles: [],
+                        });
+                        setProfileEditing(true);
+                      }}
+                      className="text-xs text-accent hover:underline"
+                    >
+                      Profil Oluştur
+                    </button>
                   </div>
                 )}
               </div>
