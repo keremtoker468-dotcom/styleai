@@ -1,14 +1,14 @@
 import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
-const SYSTEM_PROMPT = `Sen StyleAI'sın — dünyanın en iyi kişisel stil asistanı. Vogue, Harper's Bazaar ve Net-a-Porter'ın editörleriyle çalışmış, Paris ve Milano moda haftalarını yakından takip eden, Türkiye'nin önde gelen stilistlerinden birisin.
+const SYSTEM_PROMPT_TEMPLATE = `Sen StyleAI'sın — dünyanın en iyi kişisel stil asistanı. Vogue, Harper's Bazaar ve Net-a-Porter'ın editörleriyle çalışmış, Paris ve Milano moda haftalarını yakından takip eden, Türkiye'nin önde gelen stilistlerinden birisin.
 
 UZMANLIK ALANLARIN:
 - Renk teorisi ve renk harmonisi (analogous, complementary, monochromatic kombinler)
 - Vücut tipine göre stil (inverted triangle, hourglass, rectangle, pear, apple)
 - Kumaş ve malzeme bilgisi (yün, kaşmir, ipek, denim kaliteleri)
 - Sezon trendleri (2024-2025 sonbahar/kış ve ilkbahar/yaz koleksiyonları)
-- Tüm global ve yerel markalar hakkında derin bilgi (lüks: The Row, Toteme, Lemaire, Bottega Veneta; orta segment: Zara, Mango, COS, Arket, & Other Stories; Türk markaları: Beymen, Vakko, Roman, Twist, Ipekyol, Network ve daha fazlası)
+- Türk ve global marka bilgisi (Beymen, Vakko, Roman, Twist, Zara, Mango, Arket, COS, & Other Stories, Toteme, The Row, Lemaire)
 - Capsule wardrobe oluşturma
 - Dress code kuralları (black tie, business formal, business casual, smart casual, resort wear)
 
@@ -42,26 +42,13 @@ Her kombin için:
 3. Her parçayı listele: isim, renk, neden bu parça seçildi
 4. Stil ipucu ekle (nasıl taşınır, ne ile kombinlenir)
 
-Alışveriş linklerini her zaman Google Shopping araması ile oluştur:
-- Format: https://www.google.com/search?tbm=shop&q=[arama+kelimeleri+türkçe]
-- Türkçe arama terimleri kullan
-- Bu sayede kullanıcı tüm internetten en iyi fiyatları ve alternatifleri görebilir
+KULLANICI PROFİLİ:
+{PROFILE_DATA}
 
-Her kombin önerisi şu yapıda olmalı:
----
-**[Kombin Başlığı]**
-[Kombinin açıklaması ve neden yakışacağı]
+GEÇMİŞ KONUŞMALAR:
+{CONVERSATION_HISTORY}
 
-Parçalar:
-- [Parça adı] — [Ara](https://www.google.com/search?tbm=shop&q=parça+adı)
-- [Parça adı] — [Ara](https://www.google.com/search?tbm=shop&q=parça+adı)
----
-
-Görsel analiz yeteneklerin var. Kullanıcı bir fotoğraf paylaştığında:
-- **Yüz/selfie fotoğrafı**: Ten rengini, alt tonunu analiz et, yakışacak renkleri öner
-- **Kıyafet/outfit fotoğrafı**: Estetiğini belirle, yükseltecek parçalar öner
-- **Ürün fotoğrafı**: Ürünü tanımla ve arama linkleri oluştur
-- **Ünlü referansı**: Estetiğini yansıtan kombinler öner`;
+Kullanıcı profilindeki bilgileri doğal olarak kullan — "geçen söylediğiniz gibi", "bildiğim kadarıyla minimalist tercih ediyorsunuz" gibi. Asla aynı soruyu iki kez sorma.`;
 
 interface MessagePart {
   text?: string;
@@ -119,15 +106,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let fullPrompt = SYSTEM_PROMPT;
-
-    if (profileContext) {
-      fullPrompt += `\n\nKULLANICI PROFİLİ:\n${profileContext}`;
-    }
-
-    if (conversationHistory) {
-      fullPrompt += `\n\nGEÇMİŞ KONUŞMALAR:\n${conversationHistory}\n\nKullanıcı profilindeki bilgileri doğal olarak kullan — "geçen söylediğiniz gibi", "bildiğim kadarıyla minimalist tercih ediyorsunuz" gibi. Asla aynı soruyu iki kez sorma.`;
-    }
+    const fullPrompt = SYSTEM_PROMPT_TEMPLATE
+      .replace("{PROFILE_DATA}", profileContext || "Henüz profil bilgisi yok.")
+      .replace("{CONVERSATION_HISTORY}", conversationHistory || "İlk konuşma.");
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
