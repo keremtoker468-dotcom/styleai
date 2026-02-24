@@ -9,9 +9,9 @@ const geistSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "StyleAI — Your Personal Styling Assistant",
+  title: "StyleAI — Kisisel Stil Danismanin",
   description:
-    "Premium AI-powered personal styling assistant. Get curated outfit recommendations with direct shopping links from Beymen, Zara, and Mango.",
+    "AI destekli kisisel stil danismani. Beymen, Zara ve Mango'dan ozenle secilmis kombin onerileri.",
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="tr">
       <body className={`${geistSans.variable} font-sans antialiased`}>
         {children}
       </body>

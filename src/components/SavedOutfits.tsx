@@ -31,10 +31,11 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
   return (
     <div className="flex flex-col h-screen max-h-screen">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
+      <header className="glass-card flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border/60 sticky top-0 z-10">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm cursor-pointer"
+          aria-label="Geri don"
         >
           <svg
             className="w-4 h-4"
@@ -42,6 +43,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -51,8 +53,8 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
           </svg>
           <span className="hidden sm:inline">Geri</span>
         </button>
-        <h1 className="font-serif text-xl tracking-tight">
-          Kayıtlı <span className="text-accent">Kombinler</span>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight">
+          Kayitli <span className="text-accent">Kombinler</span>
         </h1>
         <div className="w-16" />
       </header>
@@ -61,27 +63,29 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
       <div className="flex-1 overflow-y-auto px-4 sm:px-6">
         <div className="max-w-xl mx-auto py-8">
           {loading ? (
-            <div className="flex items-center justify-center py-20">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-pulse-subtle" />
+            <div className="flex items-center justify-center py-20" role="status">
+              <span className="sr-only">Kombinler yukleniyor</span>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle" />
                 <span
-                  className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
+                  className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.3s" }}
                 />
                 <span
-                  className="w-1.5 h-1.5 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
+                  className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.6s" }}
                 />
               </div>
             </div>
           ) : outfits.length === 0 ? (
-            <div className="text-center py-20">
+            <div className="text-center py-20 animate-fade-in">
               <svg
-                className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30"
+                className="w-12 h-12 mx-auto mb-4 text-muted-foreground/20"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={1}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -89,33 +93,36 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                   d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
                 />
               </svg>
-              <p className="text-muted-foreground text-sm">
-                Henüz kayıtlı kombinin yok.
+              <p className="text-muted-foreground text-sm font-medium">
+                Henuz kayitli kombinin yok.
               </p>
-              <p className="text-muted-foreground/60 text-xs mt-1">
-                Sohbette beğendiğin kombinleri kaydet!
+              <p className="text-muted-foreground/50 text-xs mt-1.5">
+                Sohbette begendigin kombinleri kaydet!
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {outfits.map((outfit) => (
+              {outfits.map((outfit, i) => (
                 <div
                   key={outfit.id}
-                  className="border border-border rounded-xl p-5 animate-fade-in"
+                  className="glass-card rounded-xl p-5 animate-slide-up hover:shadow-glass-lg transition-shadow duration-300"
+                  style={{ animationDelay: `${i * 0.08}s` }}
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-serif text-lg">{outfit.title}</h3>
+                      <h3 className="font-serif text-lg font-semibold">
+                        {outfit.title}
+                      </h3>
                       {outfit.occasion && (
-                        <span className="text-xs text-accent tracking-wide">
+                        <span className="text-xs text-accent tracking-wide font-medium">
                           {outfit.occasion}
                         </span>
                       )}
                     </div>
                     <button
                       onClick={() => outfit.id && handleDelete(outfit.id)}
-                      className="text-muted-foreground/40 hover:text-red-400 transition-colors p-1"
-                      title="Sil"
+                      className="text-muted-foreground/30 hover:text-red-400 transition-colors duration-200 p-1.5 rounded-lg hover:bg-red-400/5 cursor-pointer"
+                      aria-label={`${outfit.title} kombinini sil`}
                     >
                       <svg
                         className="w-4 h-4"
@@ -123,6 +130,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                         strokeWidth={1.5}
+                        aria-hidden="true"
                       >
                         <path
                           strokeLinecap="round"
@@ -134,7 +142,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                   </div>
 
                   {outfit.description && (
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                       {outfit.description}
                     </p>
                   )}
@@ -144,18 +152,18 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                       {outfit.items.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between text-sm border-t border-border/50 pt-2"
+                          className="flex items-center justify-between text-sm border-t border-border/30 pt-2.5"
                         >
-                          <span className="text-foreground/80">
+                          <span className="text-foreground/80 font-medium">
                             {item.name}
                           </span>
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center gap-3 text-xs">
                             {item.beymen_link && (
                               <a
                                 href={item.beymen_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-accent hover:opacity-70 transition-opacity"
+                                className="text-accent hover:opacity-70 transition-opacity duration-200 font-medium"
                               >
                                 Beymen
                               </a>
@@ -165,7 +173,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                                 href={item.zara_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-accent hover:opacity-70 transition-opacity"
+                                className="text-accent hover:opacity-70 transition-opacity duration-200 font-medium"
                               >
                                 Zara
                               </a>
@@ -175,7 +183,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                                 href={item.mango_link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-accent hover:opacity-70 transition-opacity"
+                                className="text-accent hover:opacity-70 transition-opacity duration-200 font-medium"
                               >
                                 Mango
                               </a>
@@ -186,7 +194,7 @@ export default function SavedOutfits({ onBack }: SavedOutfitsProps) {
                     </div>
                   )}
 
-                  <div className="mt-3 pt-2 border-t border-border/30 text-[10px] text-muted-foreground/40">
+                  <div className="mt-3 pt-2.5 border-t border-border/20 text-[10px] text-muted-foreground/35 tracking-wide">
                     {outfit.created_at &&
                       new Date(outfit.created_at).toLocaleDateString("tr-TR", {
                         day: "numeric",

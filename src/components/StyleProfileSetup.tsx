@@ -29,8 +29,8 @@ const COLOR_OPTIONS = [
   "Bej",
   "Kahverengi",
   "Gri",
-  "Kırmızı",
-  "Yeşil",
+  "Kirmizi",
+  "Yesil",
   "Mavi",
   "Pembe",
   "Mor",
@@ -42,12 +42,12 @@ const AVOIDED_OPTIONS = [
   "Oversize",
   "Slim fit",
   "Desenli",
-  "Parlak kumaş",
+  "Parlak kumas",
   "Crop top",
-  "Kısa etek",
-  "Yüksek topuk",
-  "Spor ayakkabı",
-  "Takı/aksesuar",
+  "Kisa etek",
+  "Yuksek topuk",
+  "Spor ayakkabi",
+  "Taki/aksesuar",
 ];
 
 interface StyleProfileSetupProps {
@@ -64,16 +64,19 @@ function ChipSelector({
   onToggle: (option: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((option) => (
+    <div className="flex flex-wrap gap-2.5" role="group">
+      {options.map((option, i) => (
         <button
           key={option}
           onClick={() => onToggle(option)}
-          className={`px-3 py-1.5 rounded-full text-xs tracking-wide transition-all duration-300 border ${
+          className={`opacity-0 animate-scale-in px-4 py-2 rounded-full text-xs tracking-wide transition-all duration-200 border cursor-pointer font-medium ${
             selected.includes(option)
-              ? "bg-foreground text-background border-foreground"
-              : "bg-transparent text-muted-foreground border-border hover:border-foreground/40"
+              ? "bg-foreground text-background border-foreground shadow-glass"
+              : "bg-transparent text-muted-foreground border-border hover:border-foreground/40 hover:text-foreground hover:bg-foreground/5"
           }`}
+          style={{ animationDelay: `${i * 0.03}s` }}
+          role="checkbox"
+          aria-checked={selected.includes(option)}
         >
           {option}
         </button>
@@ -130,7 +133,7 @@ export default function StyleProfileSetup({
   };
 
   const handleSkip = () => {
-    getUserId(); // Ensure user_id is created
+    getUserId();
     onComplete(null);
   };
 
@@ -138,74 +141,94 @@ export default function StyleProfileSetup({
     // Step 0: Body measurements
     <div key="body" className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="font-serif text-2xl sm:text-3xl tracking-tight mb-2">
-          Seni tanıyalım
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
+          Seni taniyalim
         </h2>
-        <p className="text-muted-foreground text-sm">
-          Daha iyi öneriler için birkaç bilgi yeterli. Tüm alanlar isteğe
-          bağlı.
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Daha iyi oneriler icin birkac bilgi yeterli. Tum alanlar istege
+          baglidir.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block">
+          <label
+            htmlFor="height-input"
+            className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block font-medium"
+          >
             Boy
           </label>
           <input
+            id="height-input"
             type="text"
             placeholder="170 cm"
             value={height}
             onChange={(e) => setHeight(e.target.value)}
-            className="w-full bg-transparent border border-border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent border border-border rounded-xl px-3 py-3 text-sm outline-none focus:border-accent focus:shadow-accent-glow transition-all duration-200 placeholder:text-muted-foreground/40"
           />
         </div>
         <div>
-          <label className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block">
+          <label
+            htmlFor="weight-input"
+            className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block font-medium"
+          >
             Kilo
           </label>
           <input
+            id="weight-input"
             type="text"
             placeholder="65 kg"
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
-            className="w-full bg-transparent border border-border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent border border-border rounded-xl px-3 py-3 text-sm outline-none focus:border-accent focus:shadow-accent-glow transition-all duration-200 placeholder:text-muted-foreground/40"
           />
         </div>
         <div>
-          <label className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block">
-            Yaş
+          <label
+            htmlFor="age-input"
+            className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block font-medium"
+          >
+            Yas
           </label>
           <input
+            id="age-input"
             type="text"
             placeholder="25"
             value={age}
             onChange={(e) => setAge(e.target.value)}
-            className="w-full bg-transparent border border-border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent border border-border rounded-xl px-3 py-3 text-sm outline-none focus:border-accent focus:shadow-accent-glow transition-all duration-200 placeholder:text-muted-foreground/40"
           />
         </div>
         <div>
-          <label className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block">
+          <label
+            htmlFor="size-input"
+            className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block font-medium"
+          >
             Beden
           </label>
           <input
+            id="size-input"
             type="text"
             placeholder="M / 38"
             value={size}
             onChange={(e) => setSize(e.target.value)}
-            className="w-full bg-transparent border border-border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent border border-border rounded-xl px-3 py-3 text-sm outline-none focus:border-accent focus:shadow-accent-glow transition-all duration-200 placeholder:text-muted-foreground/40"
           />
         </div>
         <div className="col-span-2">
-          <label className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block">
-            Ayakkabı Numarası
+          <label
+            htmlFor="shoe-size-input"
+            className="text-xs text-muted-foreground tracking-wide uppercase mb-1.5 block font-medium"
+          >
+            Ayakkabi Numarasi
           </label>
           <input
+            id="shoe-size-input"
             type="text"
             placeholder="40"
             value={shoeSize}
             onChange={(e) => setShoeSize(e.target.value)}
-            className="w-full bg-transparent border border-border rounded-lg px-3 py-2.5 text-sm outline-none focus:border-accent transition-colors placeholder:text-muted-foreground/40"
+            className="w-full bg-transparent border border-border rounded-xl px-3 py-3 text-sm outline-none focus:border-accent focus:shadow-accent-glow transition-all duration-200 placeholder:text-muted-foreground/40"
           />
         </div>
       </div>
@@ -214,11 +237,11 @@ export default function StyleProfileSetup({
     // Step 1: Style preferences
     <div key="style" className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="font-serif text-2xl sm:text-3xl tracking-tight mb-2">
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
           Stil tercihlerin
         </h2>
-        <p className="text-muted-foreground text-sm">
-          Sana en yakın hissettiren stilleri seç.
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Sana en yakin hissettiren stilleri sec.
         </p>
       </div>
       <ChipSelector
@@ -231,11 +254,11 @@ export default function StyleProfileSetup({
     // Step 2: Color preferences
     <div key="colors" className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="font-serif text-2xl sm:text-3xl tracking-tight mb-2">
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
           Renk tercihlerin
         </h2>
-        <p className="text-muted-foreground text-sm">
-          En çok tercih ettiğin renkleri seç.
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          En cok tercih ettigin renkleri sec.
         </p>
       </div>
       <ChipSelector
@@ -248,11 +271,11 @@ export default function StyleProfileSetup({
     // Step 3: Avoided styles
     <div key="avoid" className="space-y-6 animate-fade-in">
       <div>
-        <h2 className="font-serif text-2xl sm:text-3xl tracking-tight mb-2">
-          Kaçındıkların
+        <h2 className="font-serif text-3xl sm:text-4xl font-semibold tracking-tight mb-2">
+          Kacindiklarim
         </h2>
-        <p className="text-muted-foreground text-sm">
-          Giymek istemediğin veya hoşlanmadığın şeyleri seç.
+        <p className="text-muted-foreground text-sm leading-relaxed">
+          Giymek istemedigin veya hoslanmadagin seyleri sec.
         </p>
       </div>
       <ChipSelector
@@ -269,23 +292,23 @@ export default function StyleProfileSetup({
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-10">
-          <h1 className="font-serif text-3xl tracking-tight">
+        <div className="text-center mb-10 animate-fade-in">
+          <h1 className="font-serif text-4xl font-semibold tracking-tight">
             Style<span className="text-accent">AI</span>
           </h1>
         </div>
 
-        {/* Progress dots */}
-        <div className="flex justify-center gap-2 mb-8">
+        {/* Progress bar */}
+        <div className="flex justify-center gap-2.5 mb-10" role="progressbar" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={steps.length}>
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`h-1 rounded-full transition-all duration-500 ${
                 i === step
-                  ? "bg-accent w-6"
+                  ? "bg-accent w-8"
                   : i < step
-                  ? "bg-accent/50"
-                  : "bg-border"
+                  ? "bg-accent/40 w-4"
+                  : "bg-border w-4"
               }`}
             />
           ))}
@@ -295,19 +318,19 @@ export default function StyleProfileSetup({
         {steps[step]}
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-10">
+        <div className="flex items-center justify-between mt-12">
           <button
             onClick={handleSkip}
-            className="text-muted-foreground/60 text-sm hover:text-muted-foreground transition-colors"
+            className="text-muted-foreground/50 text-sm hover:text-muted-foreground transition-colors duration-200 cursor-pointer"
           >
-            {`Geç \u2192`}
+            {`Gec \u2192`}
           </button>
 
           <div className="flex gap-3">
             {step > 0 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="border border-border text-foreground/70 px-5 py-2.5 text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:border-foreground/40 rounded-lg"
+                className="border border-border text-foreground/70 px-6 py-3 text-xs tracking-[0.15em] uppercase transition-all duration-200 hover:border-foreground/40 rounded-xl cursor-pointer font-medium"
               >
                 Geri
               </button>
@@ -315,7 +338,7 @@ export default function StyleProfileSetup({
             <button
               onClick={isLastStep ? handleSave : () => setStep(step + 1)}
               disabled={saving}
-              className="bg-foreground text-background px-6 py-2.5 text-xs tracking-[0.15em] uppercase transition-all duration-300 hover:opacity-90 rounded-lg disabled:opacity-50"
+              className="bg-foreground text-background px-8 py-3 text-xs tracking-[0.15em] uppercase transition-all duration-200 hover:opacity-90 hover:shadow-glass rounded-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium"
             >
               {saving ? "Kaydediliyor..." : isLastStep ? "Tamamla" : "Devam"}
             </button>

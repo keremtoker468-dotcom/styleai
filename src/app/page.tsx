@@ -28,32 +28,36 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <div className="animate-fade-in text-center max-w-sm w-full">
-        <h1 className="font-serif text-4xl sm:text-5xl tracking-tight mb-3">
+        <h1 className="font-serif text-5xl sm:text-6xl font-semibold tracking-tight mb-3">
           Style<span className="text-accent">AI</span>
         </h1>
-        <div className="w-12 h-px bg-accent mx-auto mb-8" />
-        <p className="text-muted-foreground text-sm mb-8">
-          Bu site şu anda özel erişime açıktır.
+        <div className="divider-accent w-16 mx-auto mb-8" />
+        <p className="text-muted-foreground text-sm mb-8 tracking-wide">
+          Bu site su anda ozel erisime aciktir.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <label htmlFor="password-input" className="sr-only">
+            Sifre
+          </label>
           <input
+            id="password-input"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Şifre"
+            placeholder="Sifre"
             autoFocus
-            className={`w-full bg-transparent border rounded-lg px-4 py-3 text-sm text-center outline-none transition-colors placeholder:text-muted-foreground/40 ${
+            className={`w-full bg-transparent border rounded-xl px-4 py-3.5 text-sm text-center outline-none transition-all duration-200 placeholder:text-muted-foreground/40 ${
               error
                 ? "border-red-400 animate-shake"
-                : "border-border focus:border-accent"
+                : "border-border focus:border-accent focus:shadow-accent-glow"
             }`}
           />
           <button
             type="submit"
-            className="w-full border border-foreground/20 text-foreground px-6 py-3 text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:border-accent hover:text-accent rounded-lg"
+            className="w-full border border-foreground/20 text-foreground px-6 py-3.5 text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-accent-glow rounded-xl cursor-pointer"
           >
-            Giriş
+            Giris
           </button>
         </form>
       </div>
@@ -69,7 +73,6 @@ export default function Home() {
   const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
-    // If no password is set, skip the gate
     if (!ACCESS_PASSWORD) {
       setAuthed(true);
     } else {
@@ -125,7 +128,7 @@ export default function Home() {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="animate-fade-in">
-          <h1 className="font-serif text-3xl tracking-tight">
+          <h1 className="font-serif text-4xl font-semibold tracking-tight">
             Style<span className="text-accent">AI</span>
           </h1>
         </div>
@@ -152,47 +155,84 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* Subtle background decoration */}
+      <div
+        className="absolute top-1/4 -right-32 w-64 h-64 rounded-full opacity-[0.03] animate-float pointer-events-none"
+        style={{ background: "var(--accent)" }}
+        aria-hidden="true"
+      />
+      <div
+        className="absolute bottom-1/4 -left-32 w-48 h-48 rounded-full opacity-[0.03] animate-float pointer-events-none"
+        style={{
+          background: "var(--accent)",
+          animationDelay: "3s",
+        }}
+        aria-hidden="true"
+      />
+
       {/* Logo / Brand */}
-      <div className="animate-fade-in text-center max-w-2xl">
-        <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl tracking-tight mb-4">
-          Style<span className="text-accent">AI</span>
-        </h1>
-        <div className="w-12 h-px bg-accent mx-auto mb-8" />
-        <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed mb-4">
-          Kişisel stil danışmanın.
+      <div className="text-center max-w-2xl relative">
+        <div className="animate-fade-in">
+          <h1 className="font-serif text-6xl sm:text-7xl md:text-8xl font-semibold tracking-tight mb-4">
+            Style<span className="text-accent">AI</span>
+          </h1>
+        </div>
+
+        <div
+          className="divider-accent w-16 mx-auto mb-10 animate-fade-in"
+          style={{ animationDelay: "0.15s" }}
+        />
+
+        <p
+          className="opacity-0 animate-slide-up text-muted-foreground text-lg sm:text-xl leading-relaxed mb-4 font-light"
+          style={{ animationDelay: "0.2s" }}
+        >
+          Kisisel stil danismanin.
         </p>
-        <p className="text-muted-foreground/70 text-sm sm:text-base leading-relaxed mb-14 max-w-md mx-auto">
-          Stilini, durumu ve tercihlerini anlat — sana mükemmel kombini
-          oluşturalım.
+        <p
+          className="opacity-0 animate-slide-up text-muted-foreground/60 text-sm sm:text-base leading-relaxed mb-16 max-w-md mx-auto"
+          style={{ animationDelay: "0.35s" }}
+        >
+          Stilini, durumu ve tercihlerini anlat — sana mukemmel kombini
+          olusturalim.
         </p>
 
-        <button
-          onClick={handleStartStyling}
-          className="group relative inline-flex items-center gap-3 border border-foreground/20 text-foreground px-10 py-4 text-xs tracking-[0.2em] uppercase transition-all duration-500 hover:border-accent hover:text-accent hover:tracking-[0.25em]"
+        <div
+          className="opacity-0 animate-slide-up"
+          style={{ animationDelay: "0.5s" }}
         >
-          <span>Başlayalım</span>
-          <svg
-            className="w-3.5 h-3.5 opacity-0 -ml-3 transition-all duration-500 group-hover:opacity-100 group-hover:ml-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
+          <button
+            onClick={handleStartStyling}
+            className="group relative inline-flex items-center gap-3 border border-foreground/20 text-foreground px-12 py-4.5 text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:border-accent hover:text-accent hover:tracking-[0.25em] hover:shadow-accent-glow rounded-xl cursor-pointer"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13 7l5 5m0 0l-5 5m5-5H6"
-            />
-          </svg>
-        </button>
+            <span className="font-medium">Baslayalim</span>
+            <svg
+              className="w-3.5 h-3.5 opacity-0 -ml-3 transition-all duration-300 group-hover:opacity-100 group-hover:ml-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13 7l5 5m0 0l-5 5m5-5H6"
+              />
+            </svg>
+          </button>
+        </div>
 
         {/* Store names */}
-        <div className="mt-20 flex items-center justify-center gap-6 text-muted-foreground/25 text-[10px] tracking-[0.3em] uppercase">
+        <div
+          className="opacity-0 animate-fade-in mt-20 flex items-center justify-center gap-8 text-muted-foreground/20 text-[10px] tracking-[0.3em] uppercase font-medium"
+          style={{ animationDelay: "0.7s" }}
+        >
           <span>Beymen</span>
-          <span className="text-border/50">&middot;</span>
+          <span className="w-1 h-1 rounded-full bg-border/50" />
           <span>Zara</span>
-          <span className="text-border/50">&middot;</span>
+          <span className="w-1 h-1 rounded-full bg-border/50" />
           <span>Mango</span>
         </div>
       </div>

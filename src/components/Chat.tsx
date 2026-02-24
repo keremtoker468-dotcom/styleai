@@ -41,13 +41,13 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const GREETING =
-  "Merhaba! Ben senin kişisel stil danışmanın. Beni her zaman ne giyeceğini bilen o arkadaşın gibi düşün. Bir selfie, beğendiğin bir kıyafet veya bulmak istediğin bir parçanın fotoğrafını da paylaşabilirsin. Söyle bakalım, nasıl bir tarz arıyorsun?";
+  "Merhaba! Ben senin kisisel stil danismanin. Beni her zaman ne giyecegini bilen o arkadasin gibi dusun. Bir selfie, begend igin bir kiyafet veya bulmak istedigin bir parcanin fotografini da paylasabilirsin. Soyle bakalim, nasil bir tarz ariyorsun?";
 
 const SUGGESTION_CHIPS = [
-  "Ünlü tarzı",
-  "Fotoğraf yükle",
+  "Unlu tarzi",
+  "Fotograf yukle",
   "Daha casual",
-  "Renk öner",
+  "Renk oner",
   "Kombini tamamla",
 ];
 
@@ -55,15 +55,15 @@ function buildProfileContext(profile: StyleProfile): string {
   const parts: string[] = [];
   if (profile.height) parts.push(`Boy: ${profile.height}`);
   if (profile.weight) parts.push(`Kilo: ${profile.weight}`);
-  if (profile.age) parts.push(`Yaş: ${profile.age}`);
+  if (profile.age) parts.push(`Yas: ${profile.age}`);
   if (profile.size) parts.push(`Beden: ${profile.size}`);
-  if (profile.shoe_size) parts.push(`Ayakkabı numarası: ${profile.shoe_size}`);
+  if (profile.shoe_size) parts.push(`Ayakkabi numarasi: ${profile.shoe_size}`);
   if (profile.style_preferences?.length)
     parts.push(`Stil tercihleri: ${profile.style_preferences.join(", ")}`);
   if (profile.color_preferences?.length)
     parts.push(`Renk tercihleri: ${profile.color_preferences.join(", ")}`);
   if (profile.avoided_styles?.length)
-    parts.push(`Kaçınılan stiller: ${profile.avoided_styles.join(", ")}`);
+    parts.push(`Kacinilan stiller: ${profile.avoided_styles.join(", ")}`);
   return parts.join("\n");
 }
 
@@ -111,7 +111,7 @@ function parseOutfitsFromMessage(
     const lines = section.split("\n");
     for (const line of lines) {
       const itemNameMatch = line.match(
-        /[-•]\s*(?:\*\*)?([^—\-*\[]+?)(?:\*\*)?\s*[—\-]/
+        /[-\u2022]\s*(?:\*\*)?([^\u2014\-*\[]+?)(?:\*\*)?\s*[\u2014\-]/
       );
       if (!itemNameMatch) continue;
 
@@ -159,7 +159,7 @@ function parseOutfitsFromMessage(
     if (items.length > 0) {
       const titleIdx = lines.findIndex((l) => l.includes(titleMatch[0]));
       const firstItemIdx = lines.findIndex((l) =>
-        l.match(/[-•]\s*(?:\*\*)?[^—\-*\[]+?(?:\*\*)?\s*[—\-]/)
+        l.match(/[-\u2022]\s*(?:\*\*)?[^\u2014\-*\[]+?(?:\*\*)?\s*[\u2014\-]/)
       );
       const descLines = lines
         .slice(
@@ -168,7 +168,7 @@ function parseOutfitsFromMessage(
         )
         .filter(
           (l) =>
-            l.trim() && !l.startsWith("---") && !l.startsWith("Parça")
+            l.trim() && !l.startsWith("---") && !l.startsWith("Parca")
         );
       const description = descLines
         .join(" ")
@@ -204,7 +204,6 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
 
   const profileContext = profile ? buildProfileContext(profile) : "";
 
-  // Load past conversation history from Supabase on mount
   useEffect(() => {
     const loadHistory = async () => {
       const userId = getUserId();
@@ -279,7 +278,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
     if (trimmed) {
       parts.push({ text: trimmed });
     } else if (pendingImage) {
-      parts.push({ text: "Bu hakkında ne düşünüyorsun?" });
+      parts.push({ text: "Bu hakkinda ne dusunuyorsun?" });
     }
 
     const displayContent = trimmed || "";
@@ -301,13 +300,12 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
       inputRef.current.style.height = "auto";
     }
 
-    // Save user message to Supabase
     const userId = getUserId();
     if (userId) {
       saveConversationMessage({
         user_id: userId,
         role: "user",
-        content: displayContent || "Bu hakkında ne düşünüyorsun?",
+        content: displayContent || "Bu hakkinda ne dusunuyorsun?",
       });
     }
 
@@ -329,7 +327,6 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to get response");
 
-      // Save assistant message to Supabase
       if (userId) {
         saveConversationMessage({
           user_id: userId,
@@ -349,7 +346,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
         ...prev,
         {
           role: "assistant",
-          content: `Bir sorun oluştu, tekrar deneyebilir misin?${errMsg ? ` (${errMsg})` : ""}`,
+          content: `Bir sorun olustu, tekrar deneyebilir misin?${errMsg ? ` (${errMsg})` : ""}`,
         },
       ]);
     } finally {
@@ -365,7 +362,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
   };
 
   const handleChipClick = (chip: string) => {
-    if (chip === "Fotoğraf yükle") {
+    if (chip === "Fotograf yukle") {
       fileInputRef.current?.click();
       return;
     }
@@ -385,7 +382,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
         }
       }
       sendMessage(
-        "Kombini tamamlamak istiyorum, elimdeki parçalarla yeni öneriler sun"
+        "Kombini tamamlamak istiyorum, elimdeki parcalarla yeni oneriler sun"
       );
       return;
     }
@@ -433,17 +430,18 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
 
   const sendCompleteTheLook = () => {
     if (!completeTheLookMode || !input.trim()) return;
-    const text = `"${completeTheLookMode.outfitTitle}" kombinini tamamlamak istiyorum. Elimde şu parça var: ${input.trim()}. Bu parçaya uygun tamamlayıcı parçalar öner ve alışveriş linkleri ver.`;
+    const text = `"${completeTheLookMode.outfitTitle}" kombinini tamamlamak istiyorum. Elimde su parca var: ${input.trim()}. Bu parcaya uygun tamamlayici parcalar oner ve alisveris linkleri ver.`;
     sendMessage(text);
   };
 
   return (
     <div className="flex flex-col h-screen max-h-screen">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
+      <header className="glass-card flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border/60 sticky top-0 z-10">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors text-sm"
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm cursor-pointer"
+          aria-label="Geri don"
         >
           <svg
             className="w-4 h-4"
@@ -451,6 +449,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={2}
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -460,13 +459,13 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
           </svg>
           <span className="hidden sm:inline">Geri</span>
         </button>
-        <h1 className="font-serif text-xl tracking-tight">
+        <h1 className="font-serif text-2xl font-semibold tracking-tight">
           Style<span className="text-accent">AI</span>
         </h1>
         <button
           onClick={onOpenSaved}
-          className="flex items-center gap-1.5 text-muted-foreground hover:text-accent transition-colors"
-          title="Kayıtlı Kombinler"
+          className="flex items-center gap-1.5 text-muted-foreground hover:text-accent transition-colors duration-200 cursor-pointer"
+          aria-label="Kayitli Kombinler"
         >
           <svg
             className="w-5 h-5"
@@ -474,6 +473,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={1.5}
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -488,7 +488,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
       {profile &&
         (profile.style_preferences?.length ||
           profile.color_preferences?.length) && (
-          <div className="px-4 sm:px-6 py-2.5 border-b border-border/50 bg-muted/30">
+          <div className="px-4 sm:px-6 py-2.5 border-b border-border/30 bg-accent-soft">
             <div className="max-w-xl mx-auto flex items-center gap-2 text-xs text-muted-foreground overflow-x-auto">
               <svg
                 className="w-3.5 h-3.5 flex-shrink-0 text-accent"
@@ -496,6 +496,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={1.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -506,7 +507,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               {profile.style_preferences?.map((s) => (
                 <span
                   key={s}
-                  className="px-2 py-0.5 bg-accent/10 text-accent rounded-full whitespace-nowrap"
+                  className="px-2.5 py-0.5 bg-accent/10 text-accent rounded-full whitespace-nowrap font-medium"
                 >
                   {s}
                 </span>
@@ -514,13 +515,13 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               {profile.color_preferences?.slice(0, 3).map((c) => (
                 <span
                   key={c}
-                  className="px-2 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap"
+                  className="px-2.5 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap"
                 >
                   {c}
                 </span>
               ))}
               {profile.size && (
-                <span className="px-2 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap">
+                <span className="px-2.5 py-0.5 bg-foreground/5 text-foreground/60 rounded-full whitespace-nowrap">
                   {profile.size}
                 </span>
               )}
@@ -537,11 +538,12 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               className={`animate-slide-up ${
                 msg.role === "user" ? "flex justify-end" : ""
               }`}
+              style={{ animationDelay: `${Math.min(i * 0.05, 0.3)}s` }}
             >
               {msg.role === "assistant" ? (
                 <div>
                   <p
-                    className="chat-message text-sm sm:text-[15px] leading-[1.8] text-foreground/85"
+                    className="chat-message text-sm sm:text-[15px] leading-[1.85] text-foreground/85"
                     dangerouslySetInnerHTML={{
                       __html: formatMessage(msg.content),
                     }}
@@ -566,11 +568,11 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                                   handleSaveOutfit(outfit, i)
                                 }
                                 disabled={isSaving || isSaved}
-                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all border ${
+                                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs transition-all duration-200 border cursor-pointer ${
                                   isSaved
                                     ? "border-accent/30 text-accent bg-accent/5"
-                                    : "border-border hover:border-accent text-muted-foreground hover:text-accent"
-                                } disabled:opacity-60`}
+                                    : "border-border hover:border-accent text-muted-foreground hover:text-accent hover:bg-accent/5"
+                                } disabled:opacity-60 disabled:cursor-not-allowed`}
                               >
                                 <svg
                                   className="w-3.5 h-3.5"
@@ -578,6 +580,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
                                   strokeWidth={1.5}
+                                  aria-hidden="true"
                                 >
                                   <path
                                     strokeLinecap="round"
@@ -595,7 +598,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                                 onClick={() =>
                                   handleCompleteTheLook(outfit)
                                 }
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition-all border border-border hover:border-accent text-muted-foreground hover:text-accent"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs transition-all duration-200 border border-border hover:border-accent text-muted-foreground hover:text-accent hover:bg-accent/5 cursor-pointer"
                               >
                                 <svg
                                   className="w-3.5 h-3.5"
@@ -603,6 +606,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
                                   strokeWidth={1.5}
+                                  aria-hidden="true"
                                 >
                                   <path
                                     strokeLinecap="round"
@@ -622,17 +626,17 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               ) : (
                 <div className="max-w-[85%] sm:max-w-[75%]">
                   {msg.imagePreview && (
-                    <div className="mb-2 rounded-xl overflow-hidden">
+                    <div className="mb-2 rounded-xl overflow-hidden shadow-glass">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={msg.imagePreview}
-                        alt="Shared"
+                        alt="Paylasilan gorsel"
                         className="max-h-48 w-auto rounded-xl object-cover"
                       />
                     </div>
                   )}
                   {msg.content && (
-                    <div className="bg-foreground text-background px-4 py-3 rounded-2xl rounded-br-sm">
+                    <div className="bg-foreground text-background px-4 py-3 rounded-2xl rounded-br-sm shadow-glass">
                       <p className="text-sm sm:text-[15px] leading-relaxed">
                         {msg.content}
                       </p>
@@ -644,15 +648,16 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
           ))}
 
           {isLoading && (
-            <div className="animate-fade-in">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle" />
+            <div className="animate-fade-in" role="status">
+              <span className="sr-only">Yanit hazirlaniyor</span>
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle" />
                 <span
-                  className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
+                  className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.3s" }}
                 />
                 <span
-                  className="w-1 h-1 bg-muted-foreground/30 rounded-full animate-pulse-subtle"
+                  className="w-1.5 h-1.5 bg-accent/40 rounded-full animate-pulse-subtle"
                   style={{ animationDelay: "0.6s" }}
                 />
               </div>
@@ -667,11 +672,12 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
       {messages.length <= 2 && !isLoading && (
         <div className="px-4 sm:px-6 pb-2">
           <div className="max-w-xl mx-auto flex gap-2 overflow-x-auto pb-1">
-            {SUGGESTION_CHIPS.map((chip) => (
+            {SUGGESTION_CHIPS.map((chip, i) => (
               <button
                 key={chip}
                 onClick={() => handleChipClick(chip)}
-                className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs border border-border text-muted-foreground hover:border-accent hover:text-accent transition-all whitespace-nowrap"
+                className="opacity-0 animate-scale-in flex-shrink-0 px-4 py-2 rounded-full text-xs border border-border text-muted-foreground hover:border-accent hover:text-accent hover:bg-accent/5 transition-all duration-200 whitespace-nowrap cursor-pointer font-medium"
+                style={{ animationDelay: `${0.1 + i * 0.08}s` }}
               >
                 {chip}
               </button>
@@ -685,14 +691,15 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
         <div className="max-w-xl mx-auto">
           {/* Complete the look banner */}
           {completeTheLookMode && (
-            <div className="mb-3 p-3 bg-accent/5 border border-accent/20 rounded-xl animate-fade-in">
+            <div className="mb-3 p-3.5 bg-accent/5 border border-accent/20 rounded-xl animate-scale-in">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-accent font-medium">
+                <span className="text-xs text-accent font-semibold tracking-wide">
                   Kombini Tamamla: {completeTheLookMode.outfitTitle}
                 </span>
                 <button
                   onClick={() => setCompleteTheLookMode(null)}
-                  className="text-muted-foreground/40 hover:text-foreground transition-colors"
+                  className="text-muted-foreground/40 hover:text-foreground transition-colors duration-200 cursor-pointer p-1"
+                  aria-label="Kombini tamamla modunu kapat"
                 >
                   <svg
                     className="w-3.5 h-3.5"
@@ -700,6 +707,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -710,25 +718,26 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                 </button>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Elindeki parçayı yaz (ör. &quot;siyah blazer var&quot;) ve
-                tamamlayıcı öneriler al
+                Elindeki parcayi yaz (or. &quot;siyah blazer var&quot;) ve
+                tamamlayici oneriler al
               </p>
             </div>
           )}
 
           {/* Image preview */}
           {pendingImage && (
-            <div className="mb-3 flex items-start gap-2 animate-fade-in">
+            <div className="mb-3 flex items-start gap-2 animate-scale-in">
               <div className="relative group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={pendingImage.previewUrl}
                   alt={pendingImage.fileName}
-                  className="h-16 w-16 object-cover rounded-lg border border-border/60"
+                  className="h-16 w-16 object-cover rounded-lg border border-border/60 shadow-glass"
                 />
                 <button
                   onClick={removePendingImage}
-                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-foreground text-background rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-foreground text-background rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+                  aria-label="Gorseli kaldir"
                 >
                   <svg
                     className="w-3 h-3"
@@ -736,6 +745,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     strokeWidth={2}
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -748,7 +758,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
             </div>
           )}
 
-          <div className="flex items-end gap-3 border border-border/60 rounded-xl px-4 py-3 bg-background/80 backdrop-blur-sm">
+          <div className="glass-card flex items-end gap-3 rounded-xl px-4 py-3">
             {/* Image upload button */}
             <input
               ref={fileInputRef}
@@ -756,12 +766,13 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               accept=".jpg,.jpeg,.png,.webp"
               onChange={handleFileSelect}
               className="hidden"
+              aria-label="Fotograf sec"
             />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
-              className="flex-shrink-0 w-7 h-7 flex items-center justify-center text-muted-foreground/50 hover:text-accent transition-colors disabled:opacity-20"
-              title="Fotoğraf paylaş"
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-muted-foreground/50 hover:text-accent transition-colors duration-200 disabled:opacity-20 cursor-pointer rounded-lg hover:bg-accent/5"
+              aria-label="Fotograf paylas"
             >
               <svg
                 className="w-[18px] h-[18px]"
@@ -769,6 +780,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={1.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -778,7 +790,11 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               </svg>
             </button>
 
+            <label htmlFor="chat-input" className="sr-only">
+              Mesaj yaz
+            </label>
             <textarea
+              id="chat-input"
               ref={inputRef}
               value={input}
               onChange={handleInputChange}
@@ -794,9 +810,9 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
               }}
               placeholder={
                 completeTheLookMode
-                  ? "Elindeki parçayı yaz... (ör. siyah blazer)"
+                  ? "Elindeki parcayi yaz... (or. siyah blazer)"
                   : pendingImage
-                  ? "Mesaj ekle veya fotoğrafı gönder..."
+                  ? "Mesaj ekle veya fotografi gonder..."
                   : "Stilinden bahset..."
               }
               rows={1}
@@ -810,7 +826,8 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                   : () => sendMessage()
               }
               disabled={(!input.trim() && !pendingImage) || isLoading}
-              className="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-muted-foreground disabled:opacity-20 transition-all hover:text-accent"
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground disabled:opacity-20 transition-all duration-200 hover:text-accent hover:bg-accent/5 cursor-pointer"
+              aria-label="Mesaj gonder"
             >
               <svg
                 className="w-4 h-4"
@@ -818,6 +835,7 @@ export default function Chat({ onBack, profile, onOpenSaved }: ChatProps) {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={1.5}
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
